@@ -6,9 +6,6 @@ use actix::prelude::*;
 use rand::{self, rngs::ThreadRng, Rng};
 use std::collections::{HashMap, HashSet};
 
-use names::{Generator, Name};
-
-
 /// Chat server sends this messages to session
 #[derive(Message)]
 pub struct Message(pub String);
@@ -20,6 +17,7 @@ pub struct Message(pub String);
 #[rtype(usize)]
 pub struct Connect {
     pub addr: Recipient<Message>,
+    pub name: String,
 }
 
 /// Session is disconnected
@@ -106,9 +104,7 @@ impl Handler<Connect> for ChatServer {
     type Result = usize;
 
     fn handle(&mut self, msg: Connect, _: &mut Context<Self>) -> Self::Result {
-        let mut generator = Generator::with_naming(Name::Plain);
-        let name = generator.next().unwrap();
-        let join_msg = format!("{} joined", name);
+        let join_msg = format!("{} joined", msg.name);
 
         println!("{}", join_msg);
 

@@ -4,6 +4,7 @@ use actix::*;
 use actix_files as fs;
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 use actix_web_actors::ws;
+use names::{Generator, Name};
 
 mod server;
 
@@ -60,9 +61,14 @@ impl Actor for WsChatSession {
         // HttpContext::state() is instance of WsChatSessionState, state is shared
         // across all routes within application
         let addr = ctx.address();
+        let mut generator = Generator::with_naming(Name::Plain);
+        let name = generator.next().unwrap();
+        self.name = Some(name.clone());
+
         self.addr
             .send(server::Connect {
                 addr: addr.recipient(),
+                name: name,
             })
             .into_actor(self)
             .then(|res, act, ctx| {
