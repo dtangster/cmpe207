@@ -49,20 +49,47 @@ Crafty.c('Player', {
         this.requires('Actor, Fourway, Color, Collision')
             .fourway(100)
             .color('rgb(20, 75, 40)')
-            .stopOnSolids();
+            .onHit('Solid', this.stopMovement);
     },
 
-    // Registers a stop-movement function to be called when
-    //  this entity hits an entity with the "Solid" component
-    stopOnSolids: function () {
-        this.onHit('Solid', this.stopMovement);
-
-        return this;
+    items: {
+        "bombs": 0,
+        "walls": 0
     },
 
-    // Stops the movement
+    // Move the player back to its original position before the collision
     stopMovement: function () {
         this.x -= this.dx;
         this.y -= this.dy;
+    }
+});
+
+// A monster that can kill any player on contact
+Crafty.c('Monster', {
+    init: function () {
+        this.requires('Actor, Color, Collision')
+            .color('rgb(105, 105, 105)')
+            .onHit('Player', this.hitPlayer);
+    },
+
+    hitPlayer: function(players) {
+        for (let i = 0; i < players.length; i++) {
+            players[i].obj.destroy();
+        }
+    }
+});
+
+// A bomb used to destroy a wall in front of you
+Crafty.c('Bomb', {
+    init: function () {
+        this.requires('Actor, Color, Collision')
+            .color('rgb(170, 125, 40)')
+            .onHit('Player', this.collect);
+    },
+
+    collect: function (players) {
+        players[0].obj.items.bombs += 1;
+        this.destroy();
+        Crafty.trigger('BombCollected', this);
     }
 });
