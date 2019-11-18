@@ -3,17 +3,17 @@
 Crafty.c('Grid', {
     init: function () {
         this.attr({
-            w: Game.map_grid.tile.width,
-            h: Game.map_grid.tile.height
+            w: Crafty.mapData.grid.tile.width,
+            h: Crafty.mapData.grid.tile.height
         })
     },
 
     // Locate this entity at the given position on the grid
     at: function (x, y) {
         if (x === undefined && y === undefined) {
-            return { x: this.x / Game.map_grid.tile.width, y: this.y / Game.map_grid.tile.height }
+            return { x: this.x / Crafty.mapData.grid.tile.width, y: this.y / Crafty.mapData.grid.tile.height }
         } else {
-            this.attr({ x: x * Game.map_grid.tile.width, y: y * Game.map_grid.tile.height });
+            this.attr({ x: x * Crafty.mapData.grid.tile.width, y: y * Crafty.mapData.grid.tile.height });
             return this;
         }
     }
@@ -62,6 +62,15 @@ Crafty.c('Player', {
         this.x -= this.dx;
         this.y -= this.dy;
     }
+});
+
+// Any other player that is not you
+Crafty.c('OtherPlayer', {
+    init: function () {
+        this.requires('Actor, Color, Collision')
+            .color('rgb(182, 75, 80)')
+            .onHit('Solid', this.stopMovement);
+    },
 });
 
 // A monster that can kill any player on contact

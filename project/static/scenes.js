@@ -1,50 +1,29 @@
 Crafty.scene('Game', function () {
-    //TODO: All this random generation should be done from the server side.
+    console.log(Crafty.mapData);
 
-    // A 2D array to keep track of all occupied tiles
-    this.occupied = new Array(Game.map_grid.width);
-    for (var i = 0; i < Game.map_grid.width; i++) {
-        this.occupied[i] = new Array(Game.map_grid.height);
-        for (var y = 0; y < Game.map_grid.height; y++) {
-            this.occupied[i][y] = false;
+    // Place monster
+    this.monster = Crafty.e('Monster').at(Crafty.mapData.players.Monster.x, Crafty.mapData.players.Monster.y);
+    this.otherPlayers = []
+
+    for (const [key, value] of Object.entries(Crafty.mapData.players)) {
+        if (key == 'Monster') {
+            continue;
+        } else if (key == Crafty.yourPlayer) {
+            this.player = Crafty.e('Player').at(Crafty.mapData.players[key].x, Crafty.mapData.players[key].y);
+        } else {
+            let other = Crafty.e('OtherPlayer').at(Crafty.mapData.players[key].x, Crafty.mapData.players[key].y);
+            this.otherPlayers.push(other);
         }
     }
 
-    // Monster placed in middle
-    this.monster = Crafty.e('Monster').at(10, 10);
-    this.occupied[this.monster.at().x][this.monster.at().y] = true;
-
-    // Player character, placed at 5, 5 on our grid
-    this.player = Crafty.e('Player').at(5, 5);
-    this.occupied[this.player.at().x][this.player.at().y] = true;
-
-    // Place a tree at every edge square on our grid of 16x16 tiles
-    for (var x = 0; x < Game.map_grid.width; x++) {
-        for (var y = 0; y < Game.map_grid.height; y++) {
-            var at_edge = x == 0 || x == Game.map_grid.width - 1 || y == 0 || y == Game.map_grid.height - 1;
-
-            if (at_edge) {
-                // Place a tree entity at the current tile
-                Crafty.e('Tree').at(x, y);
-                this.occupied[x][y] = true;
-            } else if (Math.random() < 0.06 && !this.occupied[x][y]) {
-                // Place a bush entity at the current tile
-                Crafty.e('Bush').at(x, y);
-                this.occupied[x][y] = true;
-            }
-        }
+    for (var i = 0; i < Crafty.mapData.terrain.Tree.length; i++) {
+        let coord = Crafty.mapData.terrain.Tree[i];
+        Crafty.e('Tree').at(coord.x, coord.y);
     }
 
-    // Generate up to five bombs on the map in random locations
-    var max_bombs = 5;
-    for (var x = 0; x < Game.map_grid.width; x++) {
-        for (var y = 0; y < Game.map_grid.height; y++) {
-            if (Math.random() < 0.02) {
-                if (Crafty('Bomb').length < max_bombs && !this.occupied[x][y]) {
-                    Crafty.e('Bomb').at(x, y);
-                }
-            }
-        }
+    for (var i = 0; i < Crafty.mapData.terrain.Bush.length; i++) {
+        let coord = Crafty.mapData.terrain.Bush[i];
+        Crafty.e('Bush').at(coord.x, coord.y);
     }
 
     this.show_victory = this.bind('BombCollected', function () {

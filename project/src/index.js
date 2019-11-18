@@ -20,33 +20,98 @@ server.listen(port, () => {
     console.log(`http://localhost:${port}`)
 })
 
-var player = 0;
-
-
-// TODO: The initial terrain and monster positions need to be randomized here.
-// The work done in scenes.js need to be done here instead so the server side
-// can keep track of the game state. When a new player joins, we should randomly
-// spawn the new player in an unoccupied space.
-var positions = {
-    'Terrain': {
-        'Bush': { x: 9, y: 10 },
-        'Tree': { x: 20, y: 20 }
+let map = {
+    grid: {
+        width: 40,
+        height: 25,
+        tile: {
+            width: 16,
+            height: 16
+        }
     },
-    'Players': {
-        'Monster': { x: 3, y: 3 }
-    }
+    terrain: { Tree: [], Bush: [] },
+    players: {},
+    items: { Bombs: [], Walls: [] },
+    occupied: {}
 }
+
+function getUnoccupiedSlot() {
+    var x = Math.floor(Math.random() * 1023 % map.grid.width);
+    var y = Math.floor(Math.random() * 1023 % map.grid.height);
+
+    while (map.occupied[x][y]) {
+        x = Math.floor(Math.random() * 1023 % map.grid.width);
+        y = Math.floor(Math.random() * 1023 % map.grid.height);
+    }
+
+    map.occupied[x][y] = true;
+    return { x: x, y: y };
+}
+
+function newGame() {
+    map.occupied = new Array(map.grid.width);
+    for (let i = 0; i < map.grid.width; i++) {
+        map.occupied[i] = new Array(map.grid.height);
+        for (let y = 0; y < map.grid.height; y++) {
+            map.occupied[i][y] = false;
+        }
+    }
+
+    // Place a tree at every edge square on our grid of 16x16 tiles
+    for (let x = 0; x < map.grid.width; x++) {
+        for (let y = 0; y < map.grid.height; y++) {
+            let at_edge = x == 0 || x == map.grid.width - 1 || y == 0 || y == map.grid.height - 1;
+
+            if (at_edge) {
+                // Place a tree entity at the current tile
+                map.terrain.Tree.push({ x: x, y: y })
+                map.occupied[x][y] = true;
+            } else if (Math.random() < 0.06 && !map.occupied[x][y]) {
+                // Place a bush entity at the current tile
+                map.terrain.Bush.push({ x: x, y: y })
+                map.occupied[x][y] = true;
+            }
+        }
+    }
+
+    // Create a monster at a random location
+    let at = getUnoccupiedSlot();
+    map.players.Monster = { x: at.x, y: at.y };
+
+    // Generate up to five bombs on the map in random locations
+    let max_bombs = 5;
+    var bombs_placed = 0;
+    for (let x = 0; x < map.grid.width; x++) {
+        for (let y = 0; y < map.grid.height; y++) {
+            if (Math.random() < 0.02) {
+                if (bombs_placed < max_bombs && !map.occupied[x][y]) {
+                    map.items.Bombs.push({ x: x, y: y })
+                    map.occupied[x][y] = true;
+                    bombs_placed++;
+                }
+            }
+        }
+    }
+};
+
+newGame();
 
 io.on('connection', function (socket) {
     console.log("Adding new player to scene ...");
-    player += 1;
-    positions['Players']['Player' + player] = { x: 5, y: 5 }
-    io.emit('broadcast', positions);
+    let at = getUnoccupiedSlot();
+    let count = Object.keys(map.players).length;
+    let playerName = 'Player' + count;
+    map.players[playerName] = { x: at.x, y: at.y };
+
+    // TODO: There is a race here. We probably need to clone the dictionary
+    map.newPlayer = playerName;
+
+    io.emit('new_player', map);
 
     socket.on('player_position', function (data) {
         console.log(data);
         // TODO: When a player sends their new position, we need to update our positions structure
         // and rebroadcast it to each player.
-        io.emit('broadcast', positions);
+        //io.emit('broadcast', positions);
     });
 });
