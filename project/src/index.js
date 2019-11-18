@@ -20,22 +20,32 @@ server.listen(port, () => {
     console.log(`http://localhost:${port}`)
 })
 
+var player = 0;
+
+
+// TODO: The initial terrain and monster positions need to be randomized here.
+// The work done in scenes.js need to be done here instead so the server side
+// can keep track of the game state. When a new player joins, we should randomly
+// spawn the new player in an unoccupied space.
+var positions = {
+    'Terrain': {
+        'Bush': { x: 9, y: 10 },
+        'Tree': { x: 20, y: 20 }
+    },
+    'Players': {
+        'Monster': { x: 3, y: 3 }
+    }
+}
+
 io.on('connection', function (socket) {
-    console.log("Server connected to the socket ...");
-
-    // TODO: We need to randomize these positions. We need to do something similar to scene.js
-    // and put it into this structure. The server side should be handling the state of the game.
-    // When a randomized state is created, each client needs to render the same objects.
-    var positions = {
-        'Player': {x: 0, y: 0},
-        'Monster': {x: 5, y: 5}
-    };
-
+    console.log("Adding new player to scene ...");
+    player += 1;
+    positions['Players']['Player' + player] = { x: 5, y: 5 }
     io.emit('broadcast', positions);
 
     socket.on('player_position', function (data) {
         console.log(data);
-        // TOOD: When a player sends their new position, we need to update our positions structure
+        // TODO: When a player sends their new position, we need to update our positions structure
         // and rebroadcast it to each player.
         io.emit('broadcast', positions);
     });

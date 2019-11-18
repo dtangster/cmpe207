@@ -27,6 +27,10 @@ Game = {
 
         Crafty.socket.on('broadcast', function (data) {
             console.log("Updating browser positions");
+
+            // TODO: We need to emit 'player_position' based on each frame of the game
+            // event loop. The event name is EnterFrame and each client should send its
+            // board state to the server.
             Crafty.socket.emit('player_position', { x: 3, y: 4 });
         });
 
