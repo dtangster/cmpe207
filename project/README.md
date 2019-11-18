@@ -6,6 +6,11 @@ Install a recent version of Node
 
 ## Running the application
 
+Install the necessary libraries
+```
+npm install
+```
+
 When running in production, do:
 ```
 npm run start
