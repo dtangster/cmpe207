@@ -16,7 +16,17 @@ Game = {
         Crafty.socket = io();
         Crafty.yourPlayer = null;
 
-        Crafty.socket.on('new_player', function(data) {
+        Crafty.socket.on('position_update', function (playerData) {
+            if (!Crafty.player || playerData.name == Crafty.yourPlayer.name) {
+                return;
+            }
+            console.log(`Updating player position ${JSON.stringify(playerData)}`);
+            Crafty.mapData.players[playerData.name] = playerData;
+            Crafty.otherPlayers[playerData.name].x = playerData.x;
+            Crafty.otherPlayers[playerData.name].y = playerData.y;
+        });
+
+        Crafty.socket.on('new_player', function (data) {
             Crafty.mapData = data;
 
             if (Crafty.yourPlayer) {
@@ -25,7 +35,7 @@ Game = {
                 Crafty.otherPlayers[data.newPlayer.name] = other;
                 return;
             } else {
-                Crafty.yourPlayer = data.newPlayer.name;
+                Crafty.yourPlayer = data.newPlayer;
             }
 
             // Start crafty and set a background color so that we can see it's working
@@ -35,14 +45,14 @@ Game = {
             // Simply start the "Game" scene to get things going
             Crafty.scene('Game');
 
-            // TODO: We need to emit 'player_position' based on each frame of the game
-            // event loop. The event name is EnterFrame and each client should send its
-            // board state to the server.
-            Crafty.socket.emit('player_position', { x: 3, y: 4 });
-            console.log("Test" + Crafty.player);
+            Crafty.player.bind('Move', function (data) {
+                console.log(`Notify player position update ${data}`);
+                let positionData = { name: Crafty.yourPlayer.name, x: Crafty.player.x, y: Crafty.player.y };
+                Crafty.socket.emit('player_position', positionData);
+            });
         });
 
-        Crafty.socket.on('disconnect_player', function(playerName) {
+        Crafty.socket.on('disconnect_player', function (playerName) {
             console.log(`${playerName} disconnected`);
             Crafty.otherPlayers[playerName].destroy();
             delete Crafty.otherPlayers.playerName;

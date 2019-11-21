@@ -114,11 +114,10 @@ io.on('connection', function (socket) {
     console.log(`New player: ${playerName}, All Players: ${JSON.stringify(map.players)}`);
     io.emit('new_player', mapInstance);
 
-    socket.on('player_position', function (data) {
-        console.log(data);
-        // TODO: When a player sends their new position, we need to update our positions structure
-        // and rebroadcast it to each player.
-        //io.emit('broadcast', positions);
+    socket.on('player_position', function (playerData) {
+        console.log(`Position update ${JSON.stringify(playerData)}`);
+        map.players[playerData.name] = playerData;
+        io.emit('position_update', playerData);
     });
 
     socket.on('disconnect', function() {
