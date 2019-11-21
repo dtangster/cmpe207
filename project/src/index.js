@@ -103,11 +103,12 @@ io.on('connection', function (socket) {
 
     let at = getUnoccupiedSlot();
     let playerName = 'Player' + map.count;
+    let playerData = { name: playerName, x: at.x, y: at.y };
 
-    map.players[playerName] = { name: playerName, x: at.x, y: at.y };
+    map.players[playerName] = playerData;
 
     let mapInstance = {...map};
-    mapInstance.newPlayer = playerName;
+    mapInstance.newPlayer = playerData;
     socket.player = playerName;
 
     console.log(`New player: ${playerName}, All Players: ${JSON.stringify(map.players)}`);

@@ -20,10 +20,12 @@ Game = {
             Crafty.mapData = data;
 
             if (Crafty.yourPlayer) {
-                // TODO: We need to spawn another OtherPlayer
+                console.log(`${data.newPlayer.name} just joined your game`);
+                let other = Crafty.e('OtherPlayer').at(data.newPlayer.x, data.newPlayer.y);
+                Crafty.otherPlayers[data.newPlayer.name] = other;
                 return;
             } else {
-                Crafty.yourPlayer = data.newPlayer;
+                Crafty.yourPlayer = data.newPlayer.name;
             }
 
             // Start crafty and set a background color so that we can see it's working
