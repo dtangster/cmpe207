@@ -3,16 +3,16 @@ Crafty.scene('Game', function () {
 
     // Place monster
     this.monster = Crafty.e('Monster').at(Crafty.mapData.players.Monster.x, Crafty.mapData.players.Monster.y);
-    this.otherPlayers = []
+    this.otherPlayers = {}
 
-    for (const [key, value] of Object.entries(Crafty.mapData.players)) {
+    for (const [key, coord] of Object.entries(Crafty.mapData.players)) {
         if (key == 'Monster') {
             continue;
         } else if (key == Crafty.yourPlayer) {
-            this.player = Crafty.e('Player').at(Crafty.mapData.players[key].x, Crafty.mapData.players[key].y);
+            this.player = Crafty.e('Player').at(coord.x, coord.y);
         } else {
-            let other = Crafty.e('OtherPlayer').at(Crafty.mapData.players[key].x, Crafty.mapData.players[key].y);
-            this.otherPlayers.push(other);
+            let other = Crafty.e('OtherPlayer').at(coord.x, coord.y);
+            this.otherPlayers[coord.name] = other;
         }
     }
 

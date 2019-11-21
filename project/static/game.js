@@ -16,7 +16,7 @@ Game = {
         Crafty.socket = io();
         Crafty.yourPlayer = null;
 
-        Crafty.socket.on('new_player', function (data) {
+        Crafty.socket.on('new_player', function(data) {
             Crafty.mapData = data;
 
             if (Crafty.yourPlayer) {
@@ -37,6 +37,14 @@ Game = {
             // event loop. The event name is EnterFrame and each client should send its
             // board state to the server.
             Crafty.socket.emit('player_position', { x: 3, y: 4 });
+            console.log("Test" + Crafty.player);
+        });
+
+        Crafty.socket.on('disconnect_player', function(playerName) {
+            console.log(`${playerName} disconnected`);
+            Crafty.otherPlayers[playerName].destroy();
+            delete Crafty.otherPlayers.playerName;
+            delete Crafty.mapData.players[playerName];
         });
 
     }

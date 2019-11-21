@@ -32,7 +32,8 @@ let map = {
     terrain: { Tree: [], Bush: [] },
     players: {},
     items: { Bombs: [], Walls: [] },
-    occupied: {}
+    occupied: {},
+    count: 0
 }
 
 function getUnoccupiedSlot() {
@@ -98,20 +99,31 @@ newGame();
 
 io.on('connection', function (socket) {
     console.log("Adding new player to scene ...");
+    map.count++;
+
     let at = getUnoccupiedSlot();
-    let count = Object.keys(map.players).length;
-    let playerName = 'Player' + count;
-    map.players[playerName] = { x: at.x, y: at.y };
+    let playerName = 'Player' + map.count;
 
-    // TODO: There is a race here. We probably need to clone the dictionary
-    map.newPlayer = playerName;
+    map.players[playerName] = { name: playerName, x: at.x, y: at.y };
 
-    io.emit('new_player', map);
+    let mapInstance = {...map};
+    mapInstance.newPlayer = playerName;
+    socket.player = playerName;
+
+    console.log(`New player: ${playerName}, All Players: ${JSON.stringify(map.players)}`);
+    io.emit('new_player', mapInstance);
 
     socket.on('player_position', function (data) {
         console.log(data);
         // TODO: When a player sends their new position, we need to update our positions structure
         // and rebroadcast it to each player.
         //io.emit('broadcast', positions);
+    });
+
+    socket.on('disconnect', function() {
+        console.log(`${socket.player} disconnected!`);
+        io.emit('disconnect_player', socket.player);
+        delete map.players[socket.player];
+        console.log(`Remaining players ${JSON.stringify(map.players)}`);
     });
 });

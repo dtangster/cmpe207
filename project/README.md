@@ -13,7 +13,7 @@ npm install
 
 When running in production, do:
 ```
-npm run start
+npm start
 ```
 
 When running in development, do:
