@@ -16,14 +16,22 @@ Game = {
         Crafty.socket = io();
         Crafty.yourPlayer = null;
 
-        Crafty.socket.on('position_update', function (playerData) {
-            if (!Crafty.player || playerData.name == Crafty.yourPlayer.name) {
+        Crafty.socket.on('position_update', function (players) {
+            if (!Crafty.player) {
                 return;
             }
-            console.log(`Updating player position ${JSON.stringify(playerData)}`);
-            Crafty.mapData.players[playerData.name] = playerData;
-            Crafty.otherPlayers[playerData.name].x = playerData.x;
-            Crafty.otherPlayers[playerData.name].y = playerData.y;
+            Crafty.mapData.players = players
+            console.log(`Updating player positions`);
+            console.dir(players);
+            for (const [name, info] of Object.entries(Crafty.mapData.players)) {
+                console.log(name);
+                if (name == Crafty.yourPlayer.name) {
+                    continue;
+                } else {
+                    Crafty.otherPlayers[name].x = info.x;
+                    Crafty.otherPlayers[name].y = info.y
+                }
+            }
         });
 
         Crafty.socket.on('new_player', function (data) {
@@ -47,7 +55,7 @@ Game = {
 
             Crafty.player.bind('Move', function (data) {
                 console.log(`Notify player position update ${data}`);
-                let positionData = { name: Crafty.yourPlayer.name, x: Crafty.player.x, y: Crafty.player.y };
+                let positionData = { name: Crafty.yourPlayer.name, x: Crafty.player.x, y: Crafty.player.y}
                 Crafty.socket.emit('player_position', positionData);
             });
         });

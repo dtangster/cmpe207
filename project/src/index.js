@@ -36,6 +36,13 @@ let map = {
     count: 0
 }
 
+let maxSpeed = 10;
+
+map.grid.min_x = map.grid.tile.width;
+map.grid.max_x = (map.grid.width - 2) * map.grid.tile.width;
+map.grid.min_y = map.grid.tile.height;
+map.grid.max_y = (map.grid.height - 2) * map.grid.tile.height;
+
 function getUnoccupiedSlot() {
     var x = Math.floor(Math.random() * 1023 % map.grid.width);
     var y = Math.floor(Math.random() * 1023 % map.grid.height);
@@ -67,7 +74,7 @@ function newGame() {
                 // Place a tree entity at the current tile
                 map.terrain.Tree.push({ x: x, y: y })
                 map.occupied[x][y] = true;
-            } else if (Math.random() < 0.06 && !map.occupied[x][y]) {
+            } else if (Math.random() < 0.1 && !map.occupied[x][y]) {
                 // Place a bush entity at the current tile
                 map.terrain.Bush.push({ x: x, y: y })
                 map.occupied[x][y] = true;
@@ -77,7 +84,15 @@ function newGame() {
 
     // Create a monster at a random location
     let at = getUnoccupiedSlot();
-    map.players.Monster = { x: at.x, y: at.y };
+    map.players.Monster = {
+        name: 'Monster',
+        grid_x: at.x,
+        grid_y: at.y,
+        x: at.x * map.grid.tile.width,
+        y: at.y * map.grid.tile.height,
+        dx: Math.ceil(Math.random() * 1023 % maxSpeed),
+        dy: Math.ceil(Math.random() * 1023 % maxSpeed)
+    };
 
     // Generate up to five bombs on the map in random locations
     let max_bombs = 5;
@@ -95,6 +110,50 @@ function newGame() {
     }
 };
 
+var positionIntervalId = setInterval(notifyPositions, 20);
+
+function notifyPositions() {
+    if (map.count == 0) {
+        return;
+    }
+
+    var dx = map.players.Monster.dx;
+    var dy = map.players.Monster.dy;
+    let monsterPos = {
+        x: map.players.Monster.x + dx,
+        y: map.players.Monster.y + dy
+    };
+
+    while (outOfBounds(monsterPos)) {
+        dx = Math.ceil(Math.random() * 1023 % maxSpeed);
+        dy = Math.ceil(Math.random() * 1023 % maxSpeed);
+
+        if (Math.random() < 0.5) {
+            monsterPos.x = map.players.MonsterX - dx;
+            dx *= -1;
+        } else {
+            monsterPos.x = map.players.MonsterX + dx;
+        }
+        if (Math.random() < 0.5) {
+            monsterPos.y = map.players.MonsterY - dy;
+            dy *= -1;
+        } else {
+            monsterPos.y = map.players.MonsterY + dy;
+        }
+    }
+
+    map.players.Monster.dx = dx;
+    map.players.Monster.dy = dy;
+    map.players.Monster.x += dx;
+    map.players.Monster.y += dy;
+    io.emit('position_update', map.players);
+}
+
+function outOfBounds(coord) {
+    return coord.length == 0 || coord.x <= map.grid.min_x || coord.x >= map.grid.max_x ||
+           coord.y <= map.grid.min_y || coord.y >= map.grid.max_y
+}
+
 newGame();
 
 io.on('connection', function (socket) {
@@ -103,7 +162,13 @@ io.on('connection', function (socket) {
 
     let at = getUnoccupiedSlot();
     let playerName = 'Player' + map.count;
-    let playerData = { name: playerName, x: at.x, y: at.y };
+    let playerData = {
+        name: playerName,
+        grid_x: at.x,
+        grid_y: at.y,
+        x: at.x * map.grid.tile.width,
+        y: at.y * map.grid.tile.height
+    };
 
     map.players[playerName] = playerData;
 
@@ -115,9 +180,9 @@ io.on('connection', function (socket) {
     io.emit('new_player', mapInstance);
 
     socket.on('player_position', function (playerData) {
-        console.log(`Position update ${JSON.stringify(playerData)}`);
+        console.log(`Position update for ${playerData.name}`);
         map.players[playerData.name] = playerData;
-        io.emit('position_update', playerData);
+        //io.emit('position_update', map.players);
     });
 
     socket.on('disconnect', function() {

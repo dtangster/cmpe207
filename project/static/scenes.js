@@ -1,18 +1,15 @@
 Crafty.scene('Game', function () {
     console.log(Crafty.mapData);
-
-    // Place monster
-    this.monster = Crafty.e('Monster').at(Crafty.mapData.players.Monster.x, Crafty.mapData.players.Monster.y);
     this.otherPlayers = {}
 
     for (const [key, coord] of Object.entries(Crafty.mapData.players)) {
-        console.log(`Creating player ${key}, ${coord}`);
+        console.log(`Creating player ${key}, x:${coord.grid_x} y:${coord.grid_y}`);
         if (key == 'Monster') {
-            continue;
+            this.otherPlayers[key] = Crafty.e('Monster').at(coord.grid_x, coord.grid_y);
         } else if (key == Crafty.yourPlayer.name) {
-            this.player = Crafty.e('Player').at(coord.x, coord.y);
+            this.player = Crafty.e('Player').at(coord.grid_x, coord.grid_y);
         } else {
-            let other = Crafty.e('OtherPlayer').at(coord.x, coord.y);
+            let other = Crafty.e('OtherPlayer').at(coord.grid_x, coord.grid_y);
             this.otherPlayers[coord.name] = other;
         }
     }
