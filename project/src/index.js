@@ -53,7 +53,6 @@ function getUnoccupiedSlot() {
         y = Math.floor(Math.random() * 1023 % map.grid.height);
     }
 
-    map.occupied[x][y] = true;
     return { x: x, y: y };
 }
 
@@ -98,6 +97,7 @@ function newGame() {
     }
 
     // Generate up to five bombs on the map in random locations
+    /*
     let max_bombs = 5;
     var bombs_placed = 0;
     for (let x = 0; x < map.grid.width; x++) {
@@ -111,6 +111,7 @@ function newGame() {
             }
         }
     }
+    */
 };
 
 var positionIntervalId = setInterval(notifyPositions, 20);
