@@ -59,8 +59,6 @@ Crafty.c('Player', {
 
     // Move the player back to its original position before the collision
     stopMovement: function(data) {
-        console.dir(data);
-        console.log(`dx ${this.dx} dy ${this.dy}`)
         var dx = this.dx;
         var dy = this.dy;
         var changedDx = 0;
