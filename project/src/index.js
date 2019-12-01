@@ -36,7 +36,8 @@ let map = {
     count: 0
 }
 
-let maxSpeed = 10;
+let maxSpeed = 5;
+let monsterCount = 5;
 
 map.grid.min_x = map.grid.tile.width;
 map.grid.max_x = (map.grid.width - 2) * map.grid.tile.width;
@@ -82,17 +83,19 @@ function newGame() {
         }
     }
 
-    // Create a monster at a random location
-    let at = getUnoccupiedSlot();
-    map.players.Monster = {
-        name: 'Monster',
-        grid_x: at.x,
-        grid_y: at.y,
-        x: at.x * map.grid.tile.width,
-        y: at.y * map.grid.tile.height,
-        dx: Math.ceil(Math.random() * 1023 % maxSpeed),
-        dy: Math.ceil(Math.random() * 1023 % maxSpeed)
-    };
+    // Create a monsters at random locations
+    for (let i = 0; i < monsterCount; i++) {
+        let at = getUnoccupiedSlot();
+        map.players['Monster' + (i + 1)] = {
+            name: 'Monster' + (i + 1),
+            grid_x: at.x,
+            grid_y: at.y,
+            x: at.x * map.grid.tile.width,
+            y: at.y * map.grid.tile.height,
+            dx: Math.ceil(Math.random() * 1023 % maxSpeed),
+            dy: Math.ceil(Math.random() * 1023 % maxSpeed)
+        };
+    }
 
     // Generate up to five bombs on the map in random locations
     let max_bombs = 5;
@@ -117,35 +120,39 @@ function notifyPositions() {
         return;
     }
 
-    var dx = map.players.Monster.dx;
-    var dy = map.players.Monster.dy;
-    let monsterPos = {
-        x: map.players.Monster.x + dx,
-        y: map.players.Monster.y + dy
-    };
+    for (let i = 0; i < monsterCount; i++) {
+        let monster = map.players['Monster' + (i + 1)];
+        var dx = monster.dx;
+        var dy = monster.dy;
+        let monsterPos = {
+            x: monster.x + dx,
+            y: monster.y + dy
+        };
 
-    while (outOfBounds(monsterPos)) {
-        dx = Math.ceil(Math.random() * 1023 % maxSpeed);
-        dy = Math.ceil(Math.random() * 1023 % maxSpeed);
+        while (outOfBounds(monsterPos)) {
+            dx = Math.ceil(Math.random() * 1023 % maxSpeed);
+            dy = Math.ceil(Math.random() * 1023 % maxSpeed);
 
-        if (Math.random() < 0.5) {
-            monsterPos.x = map.players.MonsterX - dx;
-            dx *= -1;
-        } else {
-            monsterPos.x = map.players.MonsterX + dx;
+            if (Math.random() < 0.5) {
+                monsterPos.x = monster.x - dx;
+                dx *= -1;
+            } else {
+                monsterPos.x = monster.x + dx;
+            }
+            if (Math.random() < 0.5) {
+                monsterPos.y = monster.y - dy;
+                dy *= -1;
+            } else {
+                monsterPos.y = monster.y + dy;
+            }
         }
-        if (Math.random() < 0.5) {
-            monsterPos.y = map.players.MonsterY - dy;
-            dy *= -1;
-        } else {
-            monsterPos.y = map.players.MonsterY + dy;
-        }
+
+        monster.dx = dx;
+        monster.dy = dy;
+        monster.x += dx;
+        monster.y += dy;
     }
 
-    map.players.Monster.dx = dx;
-    map.players.Monster.dy = dy;
-    map.players.Monster.x += dx;
-    map.players.Monster.y += dy;
     io.emit('position_update', map.players);
 }
 
