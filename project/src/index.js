@@ -158,8 +158,8 @@ function notifyPositions() {
 }
 
 function outOfBounds(coord) {
-    return coord.length == 0 || coord.x <= map.grid.min_x || coord.x >= map.grid.max_x ||
-           coord.y <= map.grid.min_y || coord.y >= map.grid.max_y
+    return coord.length == 0 || coord.x < map.grid.min_x || coord.x > map.grid.max_x ||
+           coord.y < map.grid.min_y || coord.y > map.grid.max_y
 }
 
 newGame();
