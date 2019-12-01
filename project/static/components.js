@@ -47,7 +47,7 @@ Crafty.c('Bush', {
 Crafty.c('Player', {
     init: function () {
         this.requires('Actor, Fourway, Color, Collision')
-            .fourway(100)
+            .fourway(200)
             .color('rgb(20, 75, 40)')
             .onHit('Solid', this.stopMovement);
     },
