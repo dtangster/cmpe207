@@ -3,7 +3,6 @@ Crafty.scene('Game', function () {
     this.otherPlayers = {}
 
     for (const [key, coord] of Object.entries(Crafty.mapData.players)) {
-        console.log(`Creating player ${key}, x:${coord.grid_x} y:${coord.grid_y}`);
         if (key == 'Monster') {
             this.otherPlayers[key] = Crafty.e('Monster').at(coord.grid_x, coord.grid_y);
             this.otherPlayers[key].name = key;

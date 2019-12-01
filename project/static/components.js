@@ -68,8 +68,7 @@ Crafty.c('Player', {
 Crafty.c('OtherPlayer', {
     init: function () {
         this.requires('Actor, Color, Collision')
-            .color('rgb(182, 75, 80)')
-            .onHit('Solid', this.stopMovement);
+            .color('rgb(182, 75, 80)');
     },
 });
 
@@ -83,7 +82,7 @@ Crafty.c('Monster', {
 
     hitPlayer: function(players) {
         for (let i = 0; i < players.length; i++) {
-            console.log(`${players[i].obj.name} killed!`)
+            console.log(`${players[i].obj.name} killed by client`)
             players[i].obj.destroy();
             Crafty.socket.emit('player_killed', players[i].obj.name);
         }

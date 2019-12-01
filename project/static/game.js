@@ -51,17 +51,25 @@ Game = {
             Crafty.scene('Game');
 
             Crafty.player.bind('Move', function (data) {
-                console.log(`Notify player position update ${data}`);
                 let positionData = { name: Crafty.yourPlayer.name, x: Crafty.player.x, y: Crafty.player.y}
                 Crafty.socket.emit('player_position', positionData);
             });
         });
 
         Crafty.socket.on('disconnect_player', function (playerName) {
+            if (Crafty.otherPlayers[playerName] == null) {
+                return;
+            }
             console.log(`${playerName} disconnected`);
             Crafty.otherPlayers[playerName].destroy();
-            delete Crafty.otherPlayers.playerName;
-            delete Crafty.mapData.players[playerName];
+        });
+
+        Crafty.socket.on('kill_player', function (playerName) {
+            if (Crafty.otherPlayers[playerName] == null) {
+                return;
+            }
+            console.log(`Client received message that ${playerName} has been killed.`);
+            Crafty.otherPlayers[playerName].destroy();
         });
 
     }

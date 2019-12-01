@@ -185,14 +185,15 @@ io.on('connection', function (socket) {
 
     socket.on('disconnect', function() {
         console.log(`${socket.player} disconnected!`);
-        io.emit('disconnect_player', socket.player);
         delete map.players[socket.player];
+        io.emit('disconnect_player', socket.player);
         console.log(`Remaining players ${JSON.stringify(map.players)}`);
     });
 
     socket.on('player_killed', function (playerName) {
-        console.log(`${playerName} killed!`);
-        delete map.players.playerName;
-        io.emit('disconnect_player', playerName);
+        console.log(`Server notifying clients that ${playerName} has been killed!`);
+        delete map.players[playerName];
+        io.emit('kill_player', playerName);
+        console.log(`Remaining players ${JSON.stringify(map.players)}`);
     });
 });
