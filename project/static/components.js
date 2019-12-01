@@ -30,7 +30,7 @@ Crafty.c('Actor', {
 // A Tree is just an Actor with a certain color
 Crafty.c('Tree', {
     init: function () {
-        this.requires('Actor, Color, Solid')
+        this.requires('Actor, Color, Solid, Collision')
             .color('rgb(20, 125, 40)');
     },
 });
@@ -38,7 +38,7 @@ Crafty.c('Tree', {
 // A Bush is just an Actor with a certain color
 Crafty.c('Bush', {
     init: function () {
-        this.requires('Actor, Color, Solid')
+        this.requires('Actor, Color, Solid, Collision')
             .color('rgb(20, 185, 40)');
     },
 });
@@ -58,9 +58,31 @@ Crafty.c('Player', {
     },
 
     // Move the player back to its original position before the collision
-    stopMovement: function () {
-        this.x -= this.dx;
-        this.y -= this.dy;
+    stopMovement: function(data) {
+        console.dir(data);
+        console.log(`dx ${this.dx} dy ${this.dy}`)
+        var dx = this.dx;
+        var dy = this.dy;
+        var changedDx = 0;
+        var changedDy = 0;
+
+        for (let i = 0; i < data.length; i++) {
+            if (data[i].nx) {
+                if (Math.abs(dx) == Math.abs(changedDx)) {
+                    continue;
+                }
+                let changeDx = data[i].overlap * data[i].nx;
+                this.x -= changeDx;
+                changedDx += changeDx
+            } else {
+                if (Math.abs(dy) == Math.abs(changedDy)) {
+                    continue;
+                }
+                let changeDy = data[i].overlap * data[i].ny;
+                this.y -= changeDy;
+                changedDy += changeDy;
+            }
+        }
     }
 });
 
