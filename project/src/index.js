@@ -180,9 +180,7 @@ io.on('connection', function (socket) {
     io.emit('new_player', mapInstance);
 
     socket.on('player_position', function (playerData) {
-        console.log(`Position update for ${playerData.name}`);
         map.players[playerData.name] = playerData;
-        //io.emit('position_update', map.players);
     });
 
     socket.on('disconnect', function() {
@@ -190,5 +188,11 @@ io.on('connection', function (socket) {
         io.emit('disconnect_player', socket.player);
         delete map.players[socket.player];
         console.log(`Remaining players ${JSON.stringify(map.players)}`);
+    });
+
+    socket.on('player_killed', function (playerName) {
+        console.log(`${playerName} killed!`);
+        delete map.players.playerName;
+        io.emit('disconnect_player', playerName);
     });
 });

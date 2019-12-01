@@ -6,10 +6,13 @@ Crafty.scene('Game', function () {
         console.log(`Creating player ${key}, x:${coord.grid_x} y:${coord.grid_y}`);
         if (key == 'Monster') {
             this.otherPlayers[key] = Crafty.e('Monster').at(coord.grid_x, coord.grid_y);
+            this.otherPlayers[key].name = key;
         } else if (key == Crafty.yourPlayer.name) {
             this.player = Crafty.e('Player').at(coord.grid_x, coord.grid_y);
+            this.player.name = key;
         } else {
             let other = Crafty.e('OtherPlayer').at(coord.grid_x, coord.grid_y);
+            other.name = key;
             this.otherPlayers[coord.name] = other;
         }
     }

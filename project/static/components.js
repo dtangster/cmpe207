@@ -83,7 +83,9 @@ Crafty.c('Monster', {
 
     hitPlayer: function(players) {
         for (let i = 0; i < players.length; i++) {
+            console.log(`${players[i].obj.name} killed!`)
             players[i].obj.destroy();
+            Crafty.socket.emit('player_killed', players[i].obj.name);
         }
     }
 });

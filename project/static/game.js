@@ -21,10 +21,7 @@ Game = {
                 return;
             }
             Crafty.mapData.players = players
-            console.log(`Updating player positions`);
-            console.dir(players);
             for (const [name, info] of Object.entries(Crafty.mapData.players)) {
-                console.log(name);
                 if (name == Crafty.yourPlayer.name) {
                     continue;
                 } else {
