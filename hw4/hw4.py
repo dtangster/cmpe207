@@ -1,5 +1,6 @@
 import random
 
+from flask import Flask
 import redis
 import sqlite3
 
@@ -18,29 +19,20 @@ CREATE_TABLE_QUERY = '''
     COMMIT;
 '''
 
+app = Flask(__name__)
 r = redis.Redis(host='localhost', port=6379, db=0)
 s = sqlite3.connect(":memory:")
+s.executescript(CREATE_TABLE_QUERY)
 
-
+@app.route('/<int:user_id>')
 def get_person(user_id):
     networth = r.get(user_id)
     if networth:
         networth = float(networth.decode('utf8'))
-        print(f'Found {user_id} in redis cache. Networth: ${networth}')
+        return f'Found user {user_id} in redis cache. Networth: ${networth}\n'
     else:
         person = s.execute(f'select * from person where id={user_id}').fetchone()
-        print(f'User {user_id} is not in redis cache. Fetching from sqlite and caching into redis. Networth: ${person[1]}')
         r.set(user_id, person[1])
+        return f'User {user_id} is not in redis cache. Fetching from sqlite and caching into redis. Networth: ${person[1]}\n'
 
 
-def main():
-    # Create a table with several entries
-    s.executescript(CREATE_TABLE_QUERY)
-
-    for i in range(20):
-        user_id = (random.randint(0, 500) % 5) + 1
-        get_person(user_id)
-
-
-if __name__ == '__main__':
-    main()
